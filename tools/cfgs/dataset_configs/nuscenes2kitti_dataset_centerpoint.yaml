@@ -1,0 +1,82 @@
+DATASET: 'KittiDataset'
+# DATA_PATH: '/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/train_28130/'
+DATA_PATH: '/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/val_6019/'
+
+POINT_CLOUD_RANGE: [0, -54.0, -5.0, 54.0, 54.0, 3.0]
+
+DATA_SPLIT: {
+    'train': train,
+    'test': val
+}
+
+INFO_PATH: {
+    # 'train': ["/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/nuscenes2kitti_infos_train_28130_ori.pkl"],
+    # 'train': ["/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/nuscenes2kitti_infos_train_28130_initial_pseudo_box.pkl"],
+    # 'train': ["/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/nuscenes2kitti_infos_train_28130_refine_pseudo_box0.pkl"],
+    'train': ["/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/nuscenes2kitti_infos_train_28130_refine_pseudo_box1.pkl"],
+
+    'test': ["/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/nuscenes2kitti_infos_val_6019.pkl"],
+}
+
+GET_ITEM_LIST: ["points"]
+FOV_POINTS_ONLY: True
+
+
+DATA_AUGMENTOR:
+    DISABLE_AUG_LIST: ['placeholder']
+    AUG_CONFIG_LIST:
+        - NAME: gt_sampling
+          DB_INFO_PATH:
+              - "/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/train_28130/nuscenes2kitti_dbinfos_train_28130.pkl"
+
+          USE_SHARED_MEMORY: False
+          PREPARE: {
+            filter_by_min_points: [
+              'Car:5', 'Truck:5', 'Construction_vehicle:5', 'Bus:5', 'Trailer:5', 'Barrier:5', 'Motorcycle:5', 'Bicycle:5', 'Pedestrian:5', 'Traffic_cone:5'
+              ]
+          }
+
+          SAMPLE_GROUPS: [
+            'Car:2', 'Truck:3', 'Construction_vehicle:7', 'Bus:4', 'Trailer:6', 'Barrier:2', 'Motorcycle:6', 'Bicycle:6', 'Pedestrian:2', 'Traffic_cone:2'
+            ]
+          NUM_POINT_FEATURES: 4
+          DATABASE_WITH_FAKELIDAR: False
+          REMOVE_EXTRA_WIDTH: [0.0, 0.0, 0.0]
+          LIMIT_WHOLE_SCENE: True
+
+        - NAME: random_world_flip
+          ALONG_AXIS_LIST: ['x']
+
+        - NAME: random_world_rotation
+          WORLD_ROT_ANGLE: [-0.78539816, 0.78539816]
+
+        - NAME: random_world_scaling
+          WORLD_SCALE_RANGE: [0.9, 1.1]
+
+        - NAME: random_world_translation
+          NOISE_TRANSLATE_STD: [0.5, 0.5, 0.5]
+
+POINT_FEATURE_ENCODING: {
+    encoding_type: absolute_coordinates_encoding,
+    used_feature_list: ['x', 'y', 'z', 'intensity'],
+    src_feature_list: ['x', 'y', 'z', 'intensity'],
+}
+
+
+DATA_PROCESSOR:
+    - NAME: mask_points_and_boxes_outside_range
+      REMOVE_OUTSIDE_BOXES: True
+
+    - NAME: shuffle_points
+      SHUFFLE_ENABLED: {
+        'train': True,
+        'test': True
+      }
+
+    - NAME: transform_points_to_voxels
+      VOXEL_SIZE: [0.075, 0.075, 0.2]
+      MAX_POINTS_PER_VOXEL: 10
+      MAX_NUMBER_OF_VOXELS: {
+        'train': 120000,
+        'test': 160000
+      }
