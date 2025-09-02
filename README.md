@@ -44,7 +44,7 @@ We propose a novel unsupervised 3D object detection framework built on early-sta
 1. Please refer to [OpenPCDet](https://github.com/open-mmlab/OpenPCDet), [SEEM](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once), and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) to install the environments.
 2. Prepare nuScenes dataset.
 3. Transfer nuScenes format to KITTI format by running:
-   ```shell
+```shell
 python DFU3D/tool/nuscenes2kitti.py nuscenes_gt_to_kitti --dataroot ./data/nuscenes/
 ```
 4. Follow OpenPCDet to create pkl files.
@@ -64,7 +64,7 @@ OcRFDet
             └── nuscenes2kitti_infos_val_6019.pkl
 ```
 
-4. Download the vision-foundation models from [SEEM](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) to file ./tools/PENet/XDecoder/weights/ and ./tools/PENet/Depth_Anything/weights/.
+5. Download the vision-foundation models from [SEEM](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) to file ./tools/PENet/XDecoder/weights/ and ./tools/PENet/Depth_Anything/weights/.
    
 
 #### 🏋️ Obtain the pseudo-boxes
