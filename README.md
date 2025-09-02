@@ -74,13 +74,18 @@ OcRFDet
 #### 🏋️ Obtain the pseudo-boxes
 ```shell
 cd DFU3D/tools/PENet/
-CUDA_VISIBLE_DEVICES=0 python3 main.py --command evaluate --detpath ../../data/nuscenes_kitti_format/train_28130 --conf_files X_Decoder/configs/xdecoder/segvlp_focalt_lang.yaml --overrides WEIGHT ./tools/PENet/XDecoder/weights/xdecoder_focalt_best_openseg.pt
+CUDA_VISIBLE_DEVICES=0 python3 main.py --command evaluate --detpath ../../data/nuscenes_kitti_format/train_28130 --conf_files X_Decoder/configs/xdecoder/segvlp_focalt_lang.yaml --overrides WEIGHT ./tools/PENet/XDecoder/weights/xdecoder_focalt_best_openseg.pt --pretrained_resource ./tools/PENet/Depth_Anything/weights/depth_anything_metric_depth_outdoor.pt
 ```
 
 #### 📋 Trian the base model
 ```shell
 cd DFU3D/tools/
 bash scripts/dist_train.sh 8 --cfg_file cfgs/kitti_models/centerpoint.yaml
+```
+
+#### 📋 Test the base model
+```shell
+bash scripts/dist_test.sh 8 --cfg_file cfgs/kitti_models/centerpoint.yaml --ckpt kitti_models/centerpoint/default/checkpoint.pth
 ```
 
 

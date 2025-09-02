@@ -167,7 +167,7 @@ parser.add_argument('-d', '--dilation-rate', default="2", type=int,
                     help='CSPN++ dilation rate')
 
 parser.add_argument("--model", type=str, default='zoedepth', help="Name of the model to test")
-# parser.add_argument("--pretrained_resource", type=str, default='local::./checkpoints/depth_anything_metric_depth_outdoor.pt', help="Pretrained resource to use for fetching weights.")
+
 parser.add_argument("--pretrained_resource", type=str, default="local::/opt/data/private/codeN/VirConv/tools/PENet/Depth_Anything/weights/depth_anything_metric_depth_outdoor.pt", help="Pretrained resource to use for fetching weights.")
 
 
@@ -223,9 +223,8 @@ def iterate(mode, args, loader, model, depth_anything, optimizer, logger, epoch)
     
     #########################################################
     # train idx list
-    train_txt_path = "/opt/data/private/codeN/VirConv/data/kitti/ImageSets/train.txt" # kitti
-    # train_txt_path = "/opt/data/private/codeN/OpenPCDet/data/pandaset_kitti/ImageSets/train.txt" # pandasetkitti
-    # train_txt_path = "/opt/data/private/codeN1/mmdetection3d/data/nuscenes_kitti_format/train_28130/ImageSets/train_28130.txt" # nuscenes2kitti
+    # train_txt_path = "./data/kitti/ImageSets/train.txt" # kitti
+    train_txt_path = "./data/nuscenes_kitti_format/train_28130/ImageSets/train_28130.txt" # nuscenes2kitti
     with open(train_txt_path, 'r') as f:
         lines =f.readlines()
         list_f = []
@@ -236,37 +235,7 @@ def iterate(mode, args, loader, model, depth_anything, optimizer, logger, epoch)
     #########################################################
 
 
-    # start_deep = 1835 # -1, 1850, 3700, 5550, 7490 / -1 3745 7490 # kitti
-    # end_deep = 1850
-
-    # start_deep = 3613 # -1, 1850, 3700, 5550, 7490 / -1 3745 7490 # kitti
-    # end_deep = 3700
-
-    # start_deep = 5430 # -1, 1850, 3700, 5550, 7490 / -1 3745 7490 # kitti
-    # end_deep = 5550
-
-    # start_deep = 7228 # -1, 1850, 3700, 5550, 7490 / -1 3745 7490 # kitti
-    # end_deep = 7490
-
-    ##########################################################################
-    # start_deep = 0  # nuscenes 111
-    # end_deep = 7032
-
-    # start_deep = 7031 # nuscenes 222
-    # end_deep = 14062
-
-    # start_deep = 14061 # nuscenes 333
-    # end_deep = 21092
-
-    # start_deep = 21091 # nuscenes 444
-    # end_deep = 28130
-
     for i, batch_data in enumerate(loader):
-    # for i, batch_data in islice(enumerate(loader), start_deep, end_deep + 1):
-        # if i < start_deep or i > end_deep or i not in list_f: # nuscenes
-        #     print('skip: ', str(i))
-        #     continue
-        # else:
         dstart = time.time()
         batch_data = {
             key: val.to(device)
@@ -299,24 +268,14 @@ def iterate(mode, args, loader, model, depth_anything, optimizer, logger, epoch)
         print("DepthAnything run time:", (end - start) * 1000, "ms") 
 
         pred = F.interpolate(depth['metric_depth'], (h, w), mode='bilinear', align_corners=False)[0, 0].unsqueeze(0).unsqueeze(0)
-        # pred = pred + 7 * F.normalize(pred, p=2, dim=1)
-        a, b = 0, 2
-        min_val = pred.min()
-        max_val = pred.max()
-        custom_normalized_tensor = a + ((pred - min_val) * (b - a)) / (max_val - min_val)
-        # nonlinear_normalized_tensor = custom_normalized_tensor ** 2
-        nonlinear_normalized_tensor = torch.exp(custom_normalized_tensor)
-
-        # pred = pred + 1.5 * nonlinear_normalized_tensor # kitti
-        pred = pred + 3 * nonlinear_normalized_tensor # nuscenes
         #############################################################################################################################
 
-        ####################################################PENet####################################################################
-        start = time.time()
-        pred = model(batch_data) # PENet # 19.5 ms
-        end = time.time()
-        print("PENet run time:", (end - start) * 1000, "ms")
-        ####################################################PENet####################################################################
+        # ####################################################PENet####################################################################
+        # start = time.time()
+        # pred = model(batch_data) # PENet # 19.5 ms
+        # end = time.time()
+        # print("PENet run time:", (end - start) * 1000, "ms")
+        # ####################################################PENet####################################################################
 
         #'''
         if(args.network_model == 'e'):
@@ -325,10 +284,6 @@ def iterate(mode, args, loader, model, depth_anything, optimizer, logger, epoch)
         else:
             start = time.time()
             # pred = model(batch_data) # PENet
-
-        # print(pred, 111)
-        # print(pred1, 222)
-        # print('\n')
 
         if(args.evaluate):
             gpu_time = time.time() - start
@@ -368,12 +323,7 @@ def iterate(mode, args, loader, model, depth_anything, optimizer, logger, epoch)
             print("loss:", loss, " epoch:", epoch, " ", i, "/", len(loader))
 
         if mode == "test_completion":
-            # ite = i + 0 # nuscenes visual
-
-            ite = i + 0 + 735 # nuscenes 111  
-            # ite = i + 7031 + 5536 # nuscenes 222
-            # ite = i + 14063 + 6871 # nuscenes 333
-            # ite = i + 21094 + 520 # nuscenes 333
+            ite = i
             vis_utils.save_depth_as_points(pred, ite, args.detpath) #################################### generate pseudo box #########################################
 
         if(not args.evaluate):
@@ -505,18 +455,14 @@ def main():
             shuffle=False,
             num_workers=8,
             pin_memory=True)
-        ###########################################################################################################################
-        # pipe = pipeline(task="depth-estimation", model="LiheYoung/depth-anything-small-hf")
-        # pipe = DepthAnything.from_pretrained("/opt/data/private/codeN/Depth-Anything/weights/depth_anything_vitb14.pth")
-        # pipe = DepthAnything.from_pretrained('LiheYoung/depth_anything_vitl14').cuda().eval()
-
-        cfg_path = "/opt/data/private/codeN/VirConv/tools/PENet/Depth_Anything/weights/config_s.json"
+        
+        cfg_path = "./tools/PENet/Depth_Anything/weights/config_s.json"
         with open(cfg_path) as f:
             cfg = json.load(f)
-        weights = torch.load("/opt/data/private/codeN/VirConv/tools/PENet/Depth_Anything/weights/depth_anything_vits14.pth")
+        weights = torch.load("./tools/PENet/Depth_Anything/weights/depth_anything_vits14.pth")
         depth_anything = DepthAnything(cfg).cuda().eval()
         depth_anything.load_state_dict(weights)
-        ###########################################################################################################################
+
         iterate("test_completion", args, test_loader, model, depth_anything, None, logger, 0)
         return
 
