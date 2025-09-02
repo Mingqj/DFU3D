@@ -36,3 +36,60 @@ We propose a novel unsupervised 3D object detection framework built on early-sta
 |:------------:|:----:|:----:|:---:|:---:|
 |Supervised|    100%   | 97.1 | 89.2 | 81.8|
 |DFU3D|    0   | 95.1 | 97.3 | 81.0|
+
+## Get Started
+
+#### 🛠️ Installation and Data Preparation
+
+1. Please refer to [OpenPCDet](https://github.com/open-mmlab/OpenPCDet), [SEEM](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once), and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) to install the environments.
+2. Prepare nuScenes dataset.
+3. Transfer nuScenes format to KITTI format by running:
+```shell
+python DFU3D/tool/nuscenes2kitti.py nuscenes_gt_to_kitti --dataroot ./data/nuscenes/
+```
+4. Follow OpenPCDet to create pkl files.
+
+Notice: arrange the folder as:
+```shell script
+OcRFDet
+    └──data
+        └── nuscenes
+            ├── v1.0-trainval
+            ├── sweeps 
+            └── samples
+        └── nuscenes_kitti_format
+            ├── train_28130
+            ├── val_6019
+            ├── nuscenes2kitti_infos_train_28130.pkl
+            └── nuscenes2kitti_infos_val_6019.pkl
+```
+
+5. Download the vision-foundation models from [SEEM](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once) and [DepthAnything](https://github.com/LiheYoung/Depth-Anything) to file ./tools/PENet/XDecoder/weights/ and ./tools/PENet/Depth_Anything/weights/.
+   
+
+#### 🏋️ Obtain the pseudo-boxes
+```shell
+cd DFU3D/tools/PENet/
+CUDA_VISIBLE_DEVICES=0 python3 main.py --command evaluate --detpath ../../data/nuscenes_kitti_format/train_28130 --conf_files X_Decoder/configs/xdecoder/segvlp_focalt_lang.yaml --overrides WEIGHT ./tools/PENet/XDecoder/weights/xdecoder_focalt_best_openseg.pt
+```
+
+#### 📋 Trian the base model
+```shell
+cd DFU3D/tools/
+bash scripts/dist_train.sh 8 --cfg_file cfgs/kitti_models/centerpoint.yaml
+```
+
+
+## ❛❛❞ Citation
+```bibtex
+@article{ji2025dfu3d,
+  title={Enhancing Pseudo-Boxes via Data-Level LiDAR-Camera Fusion for Unsupervised 3D Object Detection},
+  author={Ji, Mingqian and Yang, Jian and Zhang, Shanshan},
+  journal={arXiv preprint arXiv:2508.20530},
+  year={2025}
+}
+```
+
+## ❤️ Acknowledgement
+
+We thank these great works and open-source codebases: [OpenPCDet](https://github.com/open-mmlab/OpenPCDet), [SEEM](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once), [DepthAnything](https://github.com/LiheYoung/Depth-Anything), and [PENet](https://github.com/JUGGHM/PENet_ICRA2021).
