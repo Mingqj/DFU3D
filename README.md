@@ -31,7 +31,7 @@ We propose a novel unsupervised 3D object detection framework built on early-sta
 | Supervised  | 1% | 39.3 | 31.8| 1.8 | 14.3|
 | DFU3D  | 0 | 32.3 | 37.7| 15.3 | 28.4|
 
-Notice: the results are AP.
+Notice: We adopt CenterPoint as the base detector. The results are AP.
 
 **KITTI set**
 | Methods    | Label | Easy | Mod. | Hard |
@@ -39,7 +39,7 @@ Notice: the results are AP.
 |Supervised|    100%   | 97.1 | 89.2 | 81.8|
 |DFU3D|    0   | 95.1 | 97.3 | 81.0|
 
-Notice: the results are $AP_{3D}$ @ $IoU_{0.5}$.
+Notice: We adopt CenterPoint as the base detector. The results are AP$_{3D}$ @ IoU$_{0.5}$.
 
 ## Get Started
 
