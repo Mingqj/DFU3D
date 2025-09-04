@@ -39,7 +39,7 @@ Notice: We adopt CenterPoint as the base detector. The results are AP.
 |Supervised|    100%   | 97.1 | 89.2 | 81.8|
 |DFU3D|    0   | 95.1 | 97.3 | 81.0|
 
-Notice: We adopt CenterPoint as the base detector. The results are AP$_{3D}$ @ IoU$_{0.5}$.
+Notice: We adopt CenterPoint as the base detector. The results are &AP_{3D}$ @ $IoU_{0.5}$.
 
 ## Get Started
 
